@@ -1,0 +1,77 @@
+{
+  "data": {
+    "coordinates": "",
+    "timestamp": 1747751898,
+    "gw_mac": "F5:99:68:71:FA:4B",
+    "tags": {
+      "F8:84:E0:BA:33:32": {
+        "rssi": -90,
+        "timestamp": 1747751898,
+        "data": "0201041BFF9904050B7E58A5C3FBFC34008C0060805689CD27F884E0BA3332",
+        "dataFormat": 5,
+        "temperature": 14.710,
+        "humidity": 56.7325,
+        "pressure": 100171,
+        "accelX": -0.972,
+        "accelY": 0.140,
+        "accelZ": 0.096,
+        "movementCounter": 137,
+        "voltage": 2.626,
+        "txPower": 4,
+        "measurementSequenceNumber": 52519,
+        "id": "F8:84:E0:BA:33:32"
+      },
+      "D8:20:8F:5F:AB:4D": {
+        "rssi": -79,
+        "timestamp": 1747751897,
+        "data": "0201041BFF9904051257324FC45702A4FD18FFF090F6E16657D8208F5FAB4D",
+        "dataFormat": 5,
+        "temperature": 23.475,
+        "humidity": 32.1975,
+        "pressure": 100263,
+        "accelX": 0.676,
+        "accelY": -0.744,
+        "accelZ": -0.016,
+        "movementCounter": 225,
+        "voltage": 2.759,
+        "txPower": 4,
+        "measurementSequenceNumber": 26199,
+        "id": "D8:20:8F:5F:AB:4D"
+      },
+      "CE:15:CB:B3:2A:7D": {
+        "rssi": -56,
+        "timestamp": 1747751897,
+        "data": "0201061BFF99040506F56E44C46A03ECFE9CFFEC9896C8BA0ECE15CBB32A7D",
+        "dataFormat": 5,
+        "temperature": 8.905,
+        "humidity": 70.5700,
+        "pressure": 100282,
+        "accelX": 1.004,
+        "accelY": -0.356,
+        "accelZ": -0.020,
+        "movementCounter": 200,
+        "voltage": 2.820,
+        "txPower": 4,
+        "measurementSequenceNumber": 47630,
+        "id": "CE:15:CB:B3:2A:7D"
+      },
+      "DD:EF:37:DF:2A:31": {
+        "rssi": -47,
+        "timestamp": 1747751897,
+        "data": "0201061BFF990405114038C0C464FFD0FFB403F8AD9640C93EDDEF37DF2A31",
+        "dataFormat": 5,
+        "temperature": 22.080,
+        "humidity": 36.3200,
+        "pressure": 100276,
+        "accelX": -0.048,
+        "accelY": -0.076,
+        "accelZ": 1.016,
+        "movementCounter": 64,
+        "voltage": 2.988,
+        "txPower": 4,
+        "measurementSequenceNumber": 51518,
+        "id": "DD:EF:37:DF:2A:31"
+      }
+    }
+  }
+}

@@ -32,18 +32,12 @@ import (
 )
 
 type settings struct {
-	device string
-	debug  bool
-	listen string
+	debug bool
 }
 
 func parseSettings() (cmdline settings) {
-	cmdline.device = "hci0"
-	device := &deviceFlag{&cmdline.device}
 	versionFlag := flag.Bool("version", false, "Show version number and quit")
-	flag.Var(device, "device", "HCI device to use")
-	flag.BoolVar(&cmdline.debug, "debug", false, "Debug output")
-	flag.StringVar(&cmdline.listen, "listen", defaultListen, "Listen address for Prometheus metrics")
+	flag.BoolVar(&cmdline.debug, "debug", false, "Enable debug logging")
 	flag.Parse()
 	if *versionFlag {
 		printVersion()
@@ -52,27 +46,6 @@ func parseSettings() (cmdline settings) {
 }
 
 func printVersion() {
-	fmt.Printf("%s %s (%s/%s %s)\n", commandName, version, runtime.GOOS, runtime.GOARCH, runtime.Version())
+	fmt.Printf("%s (%s/%s %s)\n", commandName, runtime.GOOS, runtime.GOARCH, runtime.Version())
 	os.Exit(0)
-}
-
-type deviceFlag struct{ value *string }
-
-func (f deviceFlag) String() string {
-	return f.Get()
-}
-
-func (f deviceFlag) Get() string {
-	if f.value == nil {
-		return ""
-	}
-	return *f.value
-}
-
-func (f *deviceFlag) Set(value string) error {
-	if value == "" {
-		return fmt.Errorf("missing device name")
-	}
-	f.value = &value
-	return nil
 }

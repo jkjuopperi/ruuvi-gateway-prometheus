@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Joonas Kuorilehto
+// Copyright (c) 2025, Juho Juopperi, Joonas Kuorilehto
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,17 +22,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package metrics
+package main
 
 import (
-	"sync"
-	"time"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"gitlab.com/jtaimisto/bluewalker/host"
-	"gitlab.com/jtaimisto/bluewalker/ruuvi"
 )
+
+//
+// Set up metrics in the default Prometheus registry.
+//
 
 var (
 	ruuviFrames = promauto.NewCounterVec(prometheus.CounterOpts{
@@ -91,100 +90,16 @@ var (
 	}, []string{"device"})
 )
 
-// ttl is the duration after which sensors are forgotten if signal is lost.
-const ttl = 1 * time.Minute
-
-var deviceLastSeen map[string]time.Time
-var mu sync.Mutex
-
-func init() {
-	deviceLastSeen = make(map[string]time.Time)
-
-	go func() {
-		for range time.Tick(time.Minute) {
-			clearExpired()
-		}
-	}()
-}
-
-func ObserveRuuvi(o RuuviReading) {
-	addr := o.Address.String()
-
-	mu.Lock()
-	deviceLastSeen[addr] = time.Now()
-	mu.Unlock()
-
-	ruuviFrames.WithLabelValues(addr).Inc()
-	signalRSSI.WithLabelValues(addr).Set(float64(o.Rssi))
-	if o.VoltageValid() {
-		voltage.WithLabelValues(addr).Set(float64(o.Voltage) / 1000)
-	}
-	if o.PressureValid() {
-		pressure.WithLabelValues(addr).Set(float64(o.Pressure) / 100)
-	}
-	if o.TemperatureValid() {
-		temperature.WithLabelValues(addr).Set(float64(o.Temperature))
-	}
-	if o.HumidityValid() {
-		humidity.WithLabelValues(addr).Set(float64(o.Humidity) / 100)
-	}
-	if o.AccelerationValid() {
-		acceleration.WithLabelValues(addr, "X").Set(float64(o.AccelerationX))
-		acceleration.WithLabelValues(addr, "Y").Set(float64(o.AccelerationY))
-		acceleration.WithLabelValues(addr, "Z").Set(float64(o.AccelerationZ))
-	}
-	format.WithLabelValues(addr).Set(float64(o.DataFormat()))
-	if o.TxPowerValid() {
-		txPower.WithLabelValues(addr).Set(float64(o.TxPower))
-	}
-	if o.MoveCountValid() {
-		moveCount.WithLabelValues(addr).Set(float64(o.MoveCount))
-	}
-	if o.SeqnoValid() {
-		seqno.WithLabelValues(addr).Set(float64(o.Seqno))
-	}
-}
-
-func clearExpired() {
-	mu.Lock()
-	defer mu.Unlock()
-
-	// log.Println("Checking for expired devices")
-	now := time.Now()
-	for addr, ls := range deviceLastSeen {
-		if now.Sub(ls) > ttl {
-			// log.Printf("%v expired", addr)
-			ruuviFrames.DeleteLabelValues(addr)
-			signalRSSI.DeleteLabelValues(addr)
-			voltage.DeleteLabelValues(addr)
-			pressure.DeleteLabelValues(addr)
-			temperature.DeleteLabelValues(addr)
-			humidity.DeleteLabelValues(addr)
-			acceleration.DeleteLabelValues(addr, "X")
-			acceleration.DeleteLabelValues(addr, "Y")
-			acceleration.DeleteLabelValues(addr, "Z")
-			format.DeleteLabelValues(addr)
-			txPower.DeleteLabelValues(addr)
-			moveCount.DeleteLabelValues(addr)
-			seqno.DeleteLabelValues(addr)
-
-			delete(deviceLastSeen, addr)
-		}
-	}
-}
-
-type RuuviReading struct {
-	*host.ScanReport
-	*ruuvi.Data
-}
-
-// DataFormat guesses the Ruuvi protocol data format version. In case of
-// protocol version 3, tx power, movement counter and sequence number are
-// not valid. Otherwise guess version is 5.
-func (r RuuviReading) DataFormat() int {
-	if !r.TxPowerValid() && !r.MoveCountValid() && !r.SeqnoValid() {
-		return 3
-	} else {
-		return 5
-	}
+func ResetMetrics() {
+	ruuviFrames.Reset()
+	humidity.Reset()
+	temperature.Reset()
+	pressure.Reset()
+	acceleration.Reset()
+	voltage.Reset()
+	signalRSSI.Reset()
+	format.Reset()
+	txPower.Reset()
+	moveCount.Reset()
+	seqno.Reset()
 }

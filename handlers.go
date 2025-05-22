@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Joonas Kuorilehto
+// Copyright (c) 2025, Juho Juopperi, Joonas Kuorilehto
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,9 +22,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package metrics
+package main
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -33,23 +34,37 @@ import (
 var Handler = http.NewServeMux()
 
 func init() {
-	Handler.HandleFunc("/", handleRoot)
-	Handler.Handle("/metrics", promhttp.Handler())
+	Handler.HandleFunc("/", handleOk)
+	Handler.HandleFunc("/metrics", handleMetrics)
+	Handler.HandleFunc("/healthz", handleOk)
+	Handler.HandleFunc("/readyz", handleOk)
 }
 
-const rootContent = `ruuvi-prometheus exporter
-https://github.com/joneskoo/ruuvi-prometheus
+func handleMetrics(w http.ResponseWriter, r *http.Request) {
+	// Only allow GET requests
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-/                This page
-/metrics         Prometheus metrics endpoint
-`
+	// Update metrics before serving them
+	err := UpdateMetrics()
+	if err != nil {
+		slog.Error("Failed to update metrics", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-func handleRoot(w http.ResponseWriter, r *http.Request) {
-	if r.RequestURI != "/" {
-		http.NotFound(w, r)
+	// Serve the metrics
+	promhttp.Handler().ServeHTTP(w, r)
+}
+
+func handleOk(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(rootContent))
+	w.Write([]byte("ok\n"))
 }

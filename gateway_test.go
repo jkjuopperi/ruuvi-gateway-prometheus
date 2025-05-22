@@ -1,4 +1,4 @@
-// Copyright (c) 2025, Juho Juopperi, Joonas Kuorilehto
+// Copyright (c) 2025, Juho Juopperi
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -22,25 +22,48 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module github.com/jkjuopperi/ruuvi-gateway-prometheus
+package main
 
-require (
-	github.com/prometheus/client_golang v1.22.0
-	github.com/samber/slog-http v1.7.0
+import (
+	_ "embed"
+	"encoding/json"
+	"testing"
 )
 
-require (
-	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
-	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.62.0 // indirect
-	github.com/prometheus/procfs v0.15.1 // indirect
-	go.opentelemetry.io/otel v1.29.0 // indirect
-	go.opentelemetry.io/otel/trace v1.29.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	google.golang.org/protobuf v1.36.5 // indirect
-)
+//go:embed testdata/ruuvigw_history.json
+var ruuvigwHistoryTestData []byte
 
-go 1.24
+func TestDecode(t *testing.T) {
+	var d HistoryResponse
+	err := json.Unmarshal(ruuvigwHistoryTestData, &d)
+
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+
+	if d.Data.Timestamp != 1747751898 {
+		t.Errorf("Expected timestamp 1747751898, got %d", d.Data.Timestamp)
+	}
+
+	if d.Data.Tags == nil {
+		t.Error("Expected Tags to be non-nil")
+	}
+
+	if len(*d.Data.Tags) != 4 {
+		t.Errorf("Expected 4 tags, got %d", len(*d.Data.Tags))
+	}
+
+	if tag, ok := (*d.Data.Tags)["D8:20:8F:5F:AB:4D"]; !ok {
+		t.Error("Expected tag D8:20:8F:5F:AB:4D to be present")
+	} else {
+		if tag.Rssi != -79 {
+			t.Errorf("Expected Rssi -79, got %d", tag.Rssi)
+		}
+		if tag.Temperature != 23.475 {
+			t.Errorf("Expected Temperature 23.475, got %f", tag.Temperature)
+		}
+		if tag.Humidity != 32.1975 {
+			t.Errorf("Expected Humidity 32.1975, got %f", tag.Humidity)
+		}
+	}
+}

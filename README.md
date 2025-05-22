@@ -1,19 +1,12 @@
-# ruuvi-prometheus exporter
+# ruuvi-gateway-prometheus exporter
 
-This is a simple Prometheus exporter that exports metrics for
-Ruuvi version 3 data format Bluetooth LE advertisements.
+This is a simple Prometheus exporter that exports metrics from
+Ruuvi Gateway HTTP API to Prometheus.
+
+It is based on https://github.com/joneskoo/ruuvi-prometheus that
+exports Ruuvi sensor data from Bluetooth LE to Prometheus.
 
 ## Usage
-
-I use ruuvi exporter with Alpine Linux myself and it’s on
-[Alpine Linux repository in edge/testing].
-
-To use this binary release, install Alpine edge and enable the testing
-repository and apk add ruuvi-prometheus.
-Enable service to start at booth with `rc-update add ruuvi-prometheus`.
-
-You will need to uncomment "rpi bluetooth" in /etc/mdev.conf for
-Raspberry Pi Bluetooth to work.
 
 The service binds listen address to `:9521` by default.
 
@@ -47,16 +40,6 @@ For example:
         target_label: 'location'
         replacement: 'outdoors'
 ```
-
-## Further development
-
-Ideally I would like to run this using [gokrazy] instead, but
-my current setup requires WiFi with WPA2 and Raspberry Pi Bluetooth
-which are not supported yet. Once those blockers are solved, gokrazy
-can create Raspberry appliance image without any C code besides Linux.
-
-[Alpine Linux repository in edge/testing]: https://pkgs.alpinelinux.org/packages?name=ruuvi-prometheus&arch=armhf
-[gokrazy]: https://gokrazy.org/
 
 ## Exported metrics
 
@@ -94,10 +77,3 @@ can create Raspberry appliance image without any C code besides Linux.
   <dt>ruuvi_txpower_dbm</dt>
   <dd>Ruuvi transmit power in dBm</dd>
 </dl>
-
-## System requirements
-
-* Linux
-* Bluetooth LE; bluetoothd must not be running.
-
-[bluewalker]: https://gitlab.com/jtaimisto/bluewalker/
